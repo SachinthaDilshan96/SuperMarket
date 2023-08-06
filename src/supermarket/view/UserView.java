@@ -4,7 +4,11 @@
  */
 package supermarket.view;
 
+import java.sql.SQLException;
+import javax.swing.JOptionPane;
+import supermarket.controller.CustomerController;
 import supermarket.db.DBConnection;
+import supermarket.model.CustomerModel;
 
 /**
  *
@@ -12,10 +16,12 @@ import supermarket.db.DBConnection;
  */
 public class UserView extends javax.swing.JFrame {
 
+    private CustomerController customerController;
     /**
      * Creates new form UserView
      */
     public UserView() {
+        customerController = new CustomerController();
         initComponents();
         DBConnection.getInstance().getConnection();
     }
@@ -35,7 +41,7 @@ public class UserView extends javax.swing.JFrame {
         btnSearch = new javax.swing.JButton();
         jLabel3 = new javax.swing.JLabel();
         jPanel1 = new javax.swing.JPanel();
-        jLabel4 = new javax.swing.JLabel();
+        lblAddNewCustomer = new javax.swing.JLabel();
         txtNewNIC = new javax.swing.JTextField();
         jLabel5 = new javax.swing.JLabel();
         jLabel6 = new javax.swing.JLabel();
@@ -62,7 +68,6 @@ public class UserView extends javax.swing.JFrame {
         jLabel2.setText("Enter customer NIC");
 
         btnSearch.setBackground(new java.awt.Color(153, 153, 0));
-        btnSearch.setForeground(new java.awt.Color(255, 255, 255));
         btnSearch.setText("Search Customer");
         btnSearch.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -74,7 +79,7 @@ public class UserView extends javax.swing.JFrame {
 
         jPanel1.setBackground(new java.awt.Color(204, 204, 204));
 
-        jLabel4.setText("Add new customer");
+        lblAddNewCustomer.setText("Add new customer");
 
         jLabel5.setText("NIC");
 
@@ -89,8 +94,18 @@ public class UserView extends javax.swing.JFrame {
         jLabel10.setText("City");
 
         btnNewCustomer.setText("Add Customer");
+        btnNewCustomer.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnNewCustomerActionPerformed(evt);
+            }
+        });
 
         btnDelete.setText("Delete Customer");
+        btnDelete.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnDeleteActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
@@ -100,7 +115,7 @@ public class UserView extends javax.swing.JFrame {
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addContainerGap()
-                        .addComponent(jLabel4))
+                        .addComponent(lblAddNewCustomer))
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addGap(38, 38, 38)
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -142,7 +157,7 @@ public class UserView extends javax.swing.JFrame {
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jLabel4)
+                .addComponent(lblAddNewCustomer)
                 .addGap(18, 18, 18)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(txtNewNIC, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -232,6 +247,7 @@ public class UserView extends javax.swing.JFrame {
 
     private void btnSearchActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSearchActionPerformed
         // TODO add your handling code here:
+        searchCustomer();
     }//GEN-LAST:event_btnSearchActionPerformed
 
     private void btnHomeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnHomeActionPerformed
@@ -239,6 +255,17 @@ public class UserView extends javax.swing.JFrame {
         this.setVisible(false);
         new HomeView().setVisible(true);
     }//GEN-LAST:event_btnHomeActionPerformed
+
+    private void btnNewCustomerActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnNewCustomerActionPerformed
+        // TODO add your handling code here:
+        if(btnNewCustomer.getText().equals("Add Customer"))saveCustomer();
+        else updateCustomer();
+    }//GEN-LAST:event_btnNewCustomerActionPerformed
+
+    private void btnDeleteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDeleteActionPerformed
+        // TODO add your handling code here:
+        deleteCustomer();
+    }//GEN-LAST:event_btnDeleteActionPerformed
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -250,13 +277,13 @@ public class UserView extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
-    private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel7;
     private javax.swing.JLabel jLabel8;
     private javax.swing.JLabel jLabel9;
     private javax.swing.JPanel jPanel1;
+    private javax.swing.JLabel lblAddNewCustomer;
     private javax.swing.JTextField txtAddress;
     private javax.swing.JTextField txtCity;
     private javax.swing.JTextField txtDob;
@@ -265,4 +292,86 @@ public class UserView extends javax.swing.JFrame {
     private javax.swing.JTextField txtNic;
     private javax.swing.JTextField txtSalary;
     // End of variables declaration//GEN-END:variables
+
+    private void saveCustomer(){
+        CustomerModel customerModel = new CustomerModel(
+        txtNewNIC.getText(),
+                txtName.getText(),
+                txtAddress.getText(),
+                txtDob.getText(),
+                Double.parseDouble(txtSalary.getText()),
+                txtCity.getText()
+        );
+        try {
+            String resp = customerController.saveCustomer(customerModel);
+            clearFields();
+            JOptionPane.showMessageDialog(this, resp);
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(this, e.getMessage());
+        }
+    }
+    
+    private void searchCustomer(){
+        try{
+            CustomerModel customer = customerController.getCustomer(txtNic.getText());
+            if(customer!=null){
+                txtNewNIC.setText(customer.getNic());
+                txtName.setText(customer.getName());
+                txtAddress.setText(customer.getAddress());
+                txtDob.setText(customer.getDob());
+                txtSalary.setText(Double.toString(customer.getSalary()));
+                txtCity.setText(customer.getCity());
+                
+                btnNewCustomer.setText("Update Customer");
+                lblAddNewCustomer.setText("Update Customer");
+                txtNewNIC.setEditable(false);
+            }
+            
+        }catch(SQLException e){
+            JOptionPane.showMessageDialog(this, e.getMessage());
+        }
+    }
+    
+    private void deleteCustomer(){
+        try{
+            String resp = customerController.deleteCustomer(txtNewNIC.getText());
+            if(resp.equals("Success")){
+                JOptionPane.showMessageDialog(this, resp);
+                clearFields();
+            }else{
+                JOptionPane.showMessageDialog(this, "Please try again");
+            }
+        }catch(SQLException e){
+            JOptionPane.showMessageDialog(this, e.getMessage());
+        }
+    }
+    
+    public void updateCustomer(){
+        CustomerModel customerModel = new CustomerModel(
+        txtNewNIC.getText(),
+                txtName.getText(),
+                txtAddress.getText(),
+                txtDob.getText(),
+                Double.parseDouble(txtSalary.getText()),
+                txtCity.getText()
+        );
+        try{
+            String resp = customerController.updateCustomer(customerModel);
+            JOptionPane.showMessageDialog(this,resp);
+            clearFields();
+            
+        }catch(SQLException e){
+            JOptionPane.showMessageDialog(this, e.getMessage());
+        }
+    }
+    
+    private void clearFields(){
+        txtNewNIC.setText("");
+        txtName.setText("");
+        txtAddress.setText("");
+        txtDob.setText("");
+        txtSalary.setText("");
+        txtCity.setText("");
+    }
+    
 }

@@ -4,17 +4,27 @@
  */
 package supermarket.view;
 
+import java.sql.SQLException;
+import java.util.ArrayList;
+import javax.swing.JOptionPane;
+import javax.swing.table.DefaultTableModel;
+import supermarket.controller.InventoryController;
+import supermarket.model.ItemModel;
+
 /**
  *
  * @author sachinthadilshan
  */
 public class InventoryView extends javax.swing.JFrame {
 
+    InventoryController inventoryController;
     /**
      * Creates new form InventoryView
      */
     public InventoryView() {
+        inventoryController = new InventoryController();
         initComponents();
+        loadAllItems();
     }
 
     /**
@@ -28,7 +38,7 @@ public class InventoryView extends javax.swing.JFrame {
 
         lblInventory = new javax.swing.JLabel();
         jScrollPane1 = new javax.swing.JScrollPane();
-        jTable1 = new javax.swing.JTable();
+        tblItems = new javax.swing.JTable();
         jPanel1 = new javax.swing.JPanel();
         jLabel1 = new javax.swing.JLabel();
         txtItemCode = new javax.swing.JTextField();
@@ -41,6 +51,8 @@ public class InventoryView extends javax.swing.JFrame {
         jLabel5 = new javax.swing.JLabel();
         txtQty = new javax.swing.JTextField();
         btnAdd = new javax.swing.JButton();
+        btnClear = new javax.swing.JButton();
+        btnDelete = new javax.swing.JButton();
         btnHome = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
@@ -48,7 +60,7 @@ public class InventoryView extends javax.swing.JFrame {
         lblInventory.setFont(new java.awt.Font("Helvetica Neue", 1, 18)); // NOI18N
         lblInventory.setText("Inventory Section");
 
-        jTable1.setModel(new javax.swing.table.DefaultTableModel(
+        tblItems.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
                 {null, null, null, null},
                 {null, null, null, null},
@@ -59,7 +71,12 @@ public class InventoryView extends javax.swing.JFrame {
                 "Title 1", "Title 2", "Title 3", "Title 4"
             }
         ));
-        jScrollPane1.setViewportView(jTable1);
+        tblItems.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                tblItemsMouseClicked(evt);
+            }
+        });
+        jScrollPane1.setViewportView(tblItems);
 
         jPanel1.setBackground(new java.awt.Color(204, 204, 204));
 
@@ -73,7 +90,27 @@ public class InventoryView extends javax.swing.JFrame {
 
         jLabel5.setText("Qty on Hand");
 
-        btnAdd.setText("Add New Item");
+        btnAdd.setText("Add new Item");
+        btnAdd.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnAddActionPerformed(evt);
+            }
+        });
+
+        btnClear.setText("Clear Fields");
+        btnClear.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnClearActionPerformed(evt);
+            }
+        });
+
+        btnDelete.setText("Delete Item");
+        btnDelete.setEnabled(false);
+        btnDelete.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnDeleteActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
@@ -107,7 +144,11 @@ public class InventoryView extends javax.swing.JFrame {
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(btnAdd)
-                .addGap(143, 143, 143))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(btnClear)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(btnDelete)
+                .addGap(24, 24, 24))
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -133,7 +174,10 @@ public class InventoryView extends javax.swing.JFrame {
                     .addComponent(jLabel5)
                     .addComponent(txtQty, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 18, Short.MAX_VALUE)
-                .addComponent(btnAdd)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(btnAdd)
+                    .addComponent(btnClear)
+                    .addComponent(btnDelete))
                 .addContainerGap())
         );
 
@@ -192,10 +236,37 @@ public class InventoryView extends javax.swing.JFrame {
         new HomeView().setVisible(true);
     }//GEN-LAST:event_btnHomeActionPerformed
 
+    private void btnAddActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAddActionPerformed
+        // TODO add your handling code here:
+        addOrUpdate();
+        clearFields();
+        loadAllItems();
+    }//GEN-LAST:event_btnAddActionPerformed
+
+    private void tblItemsMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tblItemsMouseClicked
+        // TODO add your handling code here:
+        setClickedData();
+        btnDelete.setEnabled(true);
+    }//GEN-LAST:event_tblItemsMouseClicked
+
+    private void btnClearActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnClearActionPerformed
+        // TODO add your handling code here:
+        clearFields();
+        btnAdd.setText("Add new Item");
+        btnDelete.setEnabled(false);
+    }//GEN-LAST:event_btnClearActionPerformed
+
+    private void btnDeleteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDeleteActionPerformed
+        // TODO add your handling code here:
+        deleteItem();
+    }//GEN-LAST:event_btnDeleteActionPerformed
+
    
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnAdd;
+    private javax.swing.JButton btnClear;
+    private javax.swing.JButton btnDelete;
     private javax.swing.JButton btnHome;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
@@ -204,12 +275,113 @@ public class InventoryView extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel5;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JTable jTable1;
     private javax.swing.JLabel lblInventory;
+    private javax.swing.JTable tblItems;
     private javax.swing.JTextField txtDescription;
     private javax.swing.JTextField txtItemCode;
     private javax.swing.JTextField txtPackSize;
     private javax.swing.JTextField txtQty;
     private javax.swing.JTextField txtUnitPrice;
     // End of variables declaration//GEN-END:variables
+
+
+    public void addOrUpdate(){
+           ItemModel itemModel = new ItemModel(
+                   txtItemCode.getText(),
+                   txtDescription.getText(),
+                   txtPackSize.getText(),
+                   Double.parseDouble(txtUnitPrice.getText()),
+                   Integer.parseInt(txtQty.getText()));
+           
+           if(btnAdd.getText().equals("Update")){
+               System.out.println("update");
+               try{
+                   String resp = inventoryController.updateItem(itemModel);
+                   JOptionPane.showMessageDialog(this, resp);
+                   clearFields();
+               }catch(SQLException e){
+                   JOptionPane.showMessageDialog(this, e.getMessage());
+
+               }
+           }else{
+               try{
+                   String resp = inventoryController.addItem(itemModel);
+                   JOptionPane.showMessageDialog(this, resp);
+                   clearFields();
+               }catch(SQLException e){
+                   JOptionPane.showMessageDialog(this, e.getMessage());
+
+               }
+           }
+         
+    }
+    
+    public void loadAllItems(){
+        try {
+            String[] columns ={"Item Code","Description","Pack Size","Unit Price","Quantity on Hand"};
+            DefaultTableModel dtm = new DefaultTableModel(columns,0){
+                @Override
+                public boolean isCellEditable(int row,int column){
+                    return false;
+                }
+            };
+            tblItems.setModel(dtm);
+            ArrayList<ItemModel> itemModels = inventoryController.getAllItems();
+            
+            for(ItemModel itemModel:itemModels){
+                Object[] rowData = {
+                    itemModel.getItemCode(),
+                    itemModel.getDescription(),
+                    itemModel.getPackSize(),
+                    itemModel.getUnitPrice(),
+                    itemModel.getQty()
+                };
+                dtm.addRow(rowData);
+            }  
+            
+        } catch (SQLException ex) {
+            JOptionPane.showMessageDialog(this, ex.getMessage());
+        }
+    }
+    
+    public void setClickedData(){
+        
+        try {
+            String itemCode = tblItems.getValueAt(tblItems.getSelectedRow(), 0).toString();
+            ItemModel itemModel = inventoryController.getItem(itemCode);
+            if (itemModel!=null) {
+                btnAdd.setText("Update");
+                txtItemCode.setText(itemModel.getItemCode());
+                txtDescription.setText(itemModel.getDescription());
+                txtPackSize.setText(itemModel.getPackSize());
+                txtUnitPrice.setText(Double.toString(itemModel.getUnitPrice()));
+                txtQty.setText(Integer.toString(itemModel.getQty()));
+            }else{
+                JOptionPane.showMessageDialog(this, "Item Not found");
+            }
+        } catch (SQLException ex) {
+            JOptionPane.showMessageDialog(this,ex.getMessage());
+        }
+    }
+    
+    public void deleteItem(){
+         try {
+            String itemCode = txtItemCode.getText();
+            String resp = inventoryController.deleteItem(itemCode);
+            JOptionPane.showMessageDialog(this, resp);
+            clearFields();
+            loadAllItems();
+        } catch (SQLException ex) {
+            JOptionPane.showMessageDialog(this, ex);
+        }
+    }
+    
+    public void clearFields(){
+        txtItemCode.setText("");
+        txtDescription.setText("");
+        txtPackSize.setText("");
+        txtUnitPrice.setText("");
+        txtQty.setText("");
+    }
+
 }

@@ -81,6 +81,8 @@ public class NewOrderView extends javax.swing.JFrame {
         txtDiscount = new javax.swing.JTextField();
         jLabel13 = new javax.swing.JLabel();
         lblOrderID = new javax.swing.JLabel();
+        jLabel14 = new javax.swing.JLabel();
+        lblUnitPrice = new javax.swing.JLabel();
         jScrollPane1 = new javax.swing.JScrollPane();
         tblCart = new javax.swing.JTable();
         btnPlaceOrder = new javax.swing.JButton();
@@ -201,6 +203,8 @@ public class NewOrderView extends javax.swing.JFrame {
 
         lblOrderID.setText("___");
 
+        jLabel14.setText("Unit Price :");
+
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
         jPanel2Layout.setHorizontalGroup(
@@ -231,7 +235,11 @@ public class NewOrderView extends javax.swing.JFrame {
                                     .addGroup(jPanel2Layout.createSequentialGroup()
                                         .addComponent(jLabel10)
                                         .addGap(92, 92, 92)
-                                        .addComponent(lblPackSize))))
+                                        .addComponent(lblPackSize))
+                                    .addGroup(jPanel2Layout.createSequentialGroup()
+                                        .addComponent(jLabel14)
+                                        .addGap(18, 18, 18)
+                                        .addComponent(lblUnitPrice))))
                             .addGroup(jPanel2Layout.createSequentialGroup()
                                 .addComponent(jLabel8, javax.swing.GroupLayout.PREFERRED_SIZE, 70, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -277,13 +285,17 @@ public class NewOrderView extends javax.swing.JFrame {
                             .addComponent(jLabel9)
                             .addComponent(lblDescription))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(jLabel10)
                             .addComponent(lblPackSize))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(jLabel11)
-                            .addComponent(lblQty)))
+                            .addComponent(lblQty))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jLabel14)
+                            .addComponent(lblUnitPrice)))
                     .addGroup(jPanel2Layout.createSequentialGroup()
                         .addGap(20, 20, 20)
                         .addComponent(txtQty, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -377,7 +389,7 @@ public class NewOrderView extends javax.swing.JFrame {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(btnPlaceOrder)
                     .addComponent(btnDelete))
-                .addContainerGap(16, Short.MAX_VALUE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         pack();
@@ -436,6 +448,7 @@ public class NewOrderView extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel11;
     private javax.swing.JLabel jLabel12;
     private javax.swing.JLabel jLabel13;
+    private javax.swing.JLabel jLabel14;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
@@ -451,6 +464,7 @@ public class NewOrderView extends javax.swing.JFrame {
     private javax.swing.JLabel lblOrderID;
     private javax.swing.JLabel lblPackSize;
     private javax.swing.JLabel lblQty;
+    private javax.swing.JLabel lblUnitPrice;
     private javax.swing.JTable tblCart;
     private javax.swing.JTextField txtCustomerAddress;
     private javax.swing.JTextField txtCustomerName;
@@ -496,6 +510,7 @@ public class NewOrderView extends javax.swing.JFrame {
                     lblDescription.setText(item.getDescription());
                     lblPackSize.setText(item.getPackSize());
                     lblQty.setText(Integer.toString(item.getQty()));
+                    lblUnitPrice.setText(Double.toString(item.getUnitPrice()));
                 }
             }
         }catch(SQLException e){
@@ -514,11 +529,12 @@ public class NewOrderView extends javax.swing.JFrame {
                     lblOrderID.getText(),
                     txtItemId.getText(),
                     Integer.parseInt(txtQty.getText()),
-                    Double.parseDouble(txtDiscount.getText())
+                    Double.parseDouble(txtDiscount.getText()),
+                    Double.parseDouble(lblUnitPrice.getText())
             );
         orderDetailModels.add(od);
         
-         Object[] rowData = {od.getItemCode(),od.getQty(),od.getDiscount()};
+         Object[] rowData = {od.getItemCode(),od.getQty(),od.getDiscount(),od.getUnitPrice()};
             DefaultTableModel dtm = (DefaultTableModel) tblCart.getModel();
          dtm.addRow(rowData);
          clearLablels();
@@ -530,7 +546,7 @@ public class NewOrderView extends javax.swing.JFrame {
     }
     
     private void loadTable(){
-        String[] columns = {"Item Code","Qty","Discount",""};
+        String[] columns = {"Item Code","Qty","Discount","Unit Price"};
         DefaultTableModel dtm = new DefaultTableModel(columns,0){
             @Override
             public boolean isCellEditable(int row,int column){
@@ -561,7 +577,8 @@ public class NewOrderView extends javax.swing.JFrame {
         OrderModel order = new OrderModel(lblOrderID.getText(), sdf.format(new Date()), txtNIC.getText());
         try{
             String result = orderController.placeOrder(order,orderDetailModels);
-            JOptionPane.showMessageDialog(this, result);
+            double total = caluclateTotal();
+            JOptionPane.showMessageDialog(this, (result+" Total Bill is :"+total));
             clearFields();
             clearLablels();
             clearUserFields();
@@ -573,10 +590,19 @@ public class NewOrderView extends javax.swing.JFrame {
         
     }
     
+    public double caluclateTotal(){
+        double total = 0.0;
+        for(OrderDetailModel od: orderDetailModels){
+            total+=((od.getUnitPrice()-(od.getUnitPrice()*od.getDiscount()))*od.getQty());
+        }
+        return total;
+    }
+    
     public void clearLablels(){
         lblDescription.setText("");
         lblPackSize.setText("");
         lblQty.setText("");
+        lblUnitPrice.setText("");
     }
     
     public void clearFields(){

@@ -4,6 +4,8 @@
  */
 package supermarket.view;
 
+import supermarket.controller.ViewOrderController;
+
 /**
  *
  * @author sachinthadilshan
@@ -127,6 +129,8 @@ public class HomeView extends javax.swing.JFrame {
 
     private void btnOrdersActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnOrdersActionPerformed
         // TODO add your handling code here:
+        this.setVisible(false);
+        new OrderView().setVisible(true);
     }//GEN-LAST:event_btnOrdersActionPerformed
 
     private void btnCustomersActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCustomersActionPerformed

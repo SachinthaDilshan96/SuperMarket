@@ -121,6 +121,8 @@ public class HomeView extends javax.swing.JFrame {
 
     private void btnNewOrderActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnNewOrderActionPerformed
         // TODO add your handling code here:
+        this.setVisible(false);
+        new NewOrderView().setVisible(true);
     }//GEN-LAST:event_btnNewOrderActionPerformed
 
     private void btnOrdersActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnOrdersActionPerformed
